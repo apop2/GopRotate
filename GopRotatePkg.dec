@@ -1,0 +1,25 @@
+[Defines]
+  DEC_SPECIFICATION              = 0x00010005
+  PACKAGE_NAME                   = GopRotatePkg
+  PACKAGE_GUID                   = 8CA298F4-D0A5-495a-A7FE-75DC587C8FC5
+  PACKAGE_VERSION                = 0.90
+
+[Includes]
+  Include
+
+[LibraryClasses]
+
+[Guids]
+  gGopRotatePkgGuid = { 0xb0ce0356, 0xcb2a, 0x4680, { 0xaa, 0xeb, 0xe0, 0x1f, 0xac, 0x7a, 0x9c, 0xcf } }
+
+[Protocols]
+  gGraphicsOutputProtocolRotateProtocolGuid = { 0xda62085c, 0x96e4, 0x4345, { 0xa3, 0xb0, 0x98, 0x89, 0xda, 0xf3, 0x16, 0xb7 } }
+
+[PcdsFixedAtBuild]
+  ## Default rotation for the GOP Rotate driver.<BR><BR>
+  #  0:                    0 The screen will be rotated by 0 degrees counter clock wise
+  #  1:                   90 The screen will be rotated by 90 degrees counter clock wise
+  #  2:                  180 The screen will be rotated by 180 degrees counter clock wise
+  #  3:                  270 The screen will be rotated by 270 degrees counter clock wise
+  # @Prompt Set default rotation for the GOP rotate driver
+  gGopRotatePkgGuid.DefaultGopRotation|0|UINT8|0
