@@ -153,7 +153,6 @@ GraphicsOutputRotateDriverSupported (
         return EFI_ALREADY_STARTED;
     }
 
-
     return EFI_SUCCESS;
 }
 
@@ -194,7 +193,7 @@ GraphicsOutputRotateDriverStart (
     if(EFI_ERROR(Status))
         return EFI_UNSUPPORTED;
 
-    Status = gBS->AllocatePool(EfiBootServicesData, sizeof(GRAPHICS_OUTPUT_ROTATE_PRIVATE), &Private);
+    Status = gBS->AllocatePool(EfiBootServicesData, sizeof(GRAPHICS_OUTPUT_ROTATE_PRIVATE), (VOID**)&Private);
     if(!EFI_ERROR(Status))
     {
         Private->Signature = GRAPHICS_OUTPUT_ROTATE_DEV_SIGNATURE;
@@ -209,8 +208,7 @@ GraphicsOutputRotateDriverStart (
         Status = gBS->InstallMultipleProtocolInterfaces(&   Controller,
                                                         &gGraphicsOutputProtocolRotateProtocolGuid, &(Private->GopRotate),
                                                         NULL);
-        DEBUG((EFI_D_ERROR, "Install returned %r\n", Status));
-        Status = gBS->AllocatePool(EfiBootServicesData, sizeof(GOP_DEVICE_LIST), &NewEntry);
+        Status = gBS->AllocatePool(EfiBootServicesData, sizeof(GOP_DEVICE_LIST), (VOID**)&NewEntry);
         if(!EFI_ERROR(Status))
         {
             NewEntry->Private = Private;
@@ -265,54 +263,31 @@ GraphicsOutputRotateDriverStop (
     Private = GetPrivateFromGopRotate(RotateProtocol);
     if(Private != NULL)
     {
-        DEBUG((EFI_D_ERROR, "Found Private From Gop Rotate\n"));
         Status = gBS->UninstallProtocolInterface(   Controller,
                                                     &gGraphicsOutputProtocolRotateProtocolGuid,
                                                     &Private->GopRotate);
-        DEBUG((EFI_D_ERROR, "Uninstall returned %r\n", Status));
         Status = gBS->OpenProtocol( Controller, 
                                     &gEfiGraphicsOutputProtocolGuid, 
                                     (VOID**)&Gop, 
                                     This->DriverBindingHandle, 
                                     Controller, 
                                     EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-        DEBUG((EFI_D_ERROR, "Open returned %r\n", Status));
         if(!EFI_ERROR (Status))
-        {
             Gop->Blt = Private->Blt;
-#if 0
-            Status = gBS->CloseProtocol(Controller,
-                                        &gEfiGraphicsOutputProtocolGuid,
-                                        This->DriverBindingHandle,
-                                        Controller);
-#endif
-        }
 
         for(Entry = (GOP_DEVICE_LIST*)GetFirstNode(&GopDeviceList); 
             !IsNull(&GopDeviceList, &(Entry->Link)); 
             Entry = (GOP_DEVICE_LIST*)GetNextNode(&GopDeviceList, &(Entry->Link))) 
         {
             if(Entry->Private == Private)
-            {
-                DEBUG((EFI_D_ERROR, "Found Entry that matched private\n"));
                 RemoveEntryList((LIST_ENTRY*)Entry);
-            }
         }
-        {
-
-            GRAPHICS_OUTPUT_ROTATE_PRIVATE *NewPrivate = GetPrivateFromGop(Gop);
-            if(NewPrivate != NULL)
-                DEBUG((EFI_D_ERROR, "ERROR!!!  Private is still part of linked list!!\n"));
-        }
-
         gBS->SetMem(Private, sizeof(GRAPHICS_OUTPUT_ROTATE_PRIVATE), 0);
         gBS->FreePool(Private);
     
     }
     return EFI_SUCCESS;
 }
-
-
 
 /**
  *      Module entry point. Installs a driver binding protocol instance for managing devices that
@@ -325,12 +300,15 @@ EFI_STATUS EFIAPI GopRotateEntryPoint(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *
 {
     EFI_STATUS Status;
     InitializeListHead(&GopDeviceList);
-    Status = EfiLibInstallDriverBindingComponentName2(  ImageHandle,
-                                                        SystemTable,
-                                                        &gGraphicsOutputRotateDriverBinding,
-                                                        ImageHandle,
-                                                        &gGraphicsOutputRotateComponentName,
-                                                        &gGraphicsOutputRotateComponentName2);
-    ASSERT_EFI_ERROR (Status);
+
+    gGraphicsOutputRotateDriverBinding.ImageHandle = ImageHandle;
+    gGraphicsOutputRotateDriverBinding.DriverBindingHandle = ImageHandle;
+
+    Status = gBS->InstallMultipleProtocolInterfaces(&gGraphicsOutputRotateDriverBinding.DriverBindingHandle,
+                                                    &gEfiDriverBindingProtocolGuid, &gGraphicsOutputRotateDriverBinding,
+                                                    &gEfiComponentNameProtocolGuid, &gGraphicsOutputRotateComponentName,
+                                                    &gEfiComponentName2ProtocolGuid, &gGraphicsOutputRotateComponentName2,
+                                                    NULL);
+
     return EFI_SUCCESS;
 }
