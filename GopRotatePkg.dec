@@ -22,4 +22,4 @@
   #  2:                  180 The screen will be rotated by 180 degrees counter clock wise
   #  3:                  270 The screen will be rotated by 270 degrees counter clock wise
   # @Prompt Set default rotation for the GOP rotate driver
-  gGopRotatePkgGuid.DefaultGopRotation|2|UINT8|0
+  gGopRotatePkgGuid.DefaultGopRotation|0|UINT8|0
