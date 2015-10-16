@@ -50,6 +50,7 @@
   BaseLib
   UefiBootServicesTableLib
   DebugLib
+  UefiLib
   UefiDriverEntryPoint
   PcdLib
    
@@ -62,6 +63,9 @@
   gEfiGraphicsOutputProtocolGuid                ## CONSUMES
   gGraphicsOutputProtocolRotateProtocolGuid     ## PRODUCES and CONSUMES
   gEfiDevicePathProtocolGuid                    ## CONSUMES
+  gEfiComponentName2ProtocolGuid		## PRODUCES
+  gEfiComponentNameProtocolGuid			## PRODUCES
+  gEfiDriverBindingProtocolGuid			## PRODUCES
 
 [Depex]
   TRUE

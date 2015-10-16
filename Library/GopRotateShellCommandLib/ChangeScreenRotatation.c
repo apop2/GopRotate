@@ -93,7 +93,7 @@ SHELL_STATUS EFIAPI ShellCommandRotate(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_
 
     Handle = ConvertHandleIndexToHandle((UINTN)HandleNumber);
 
-    Status = gBS->HandleProtocol(Handle, &gGraphicsOutputProtocolRotateProtocolGuid, &GopRotate);
+    Status = gBS->HandleProtocol(Handle, &gGraphicsOutputProtocolRotateProtocolGuid, (VOID**)&GopRotate);
     if(EFI_ERROR(Status))
     {
         Print(L"No Gop Rotate Protocol found on device\n");
