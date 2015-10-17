@@ -1,5 +1,6 @@
 # UefiGopRotate
-A EDK2 Package that supplies a UEFI driver that will bind on top of Graphics Output Devices and rotate any Blt operations by 0, 90, 180 or 270 degrees.
+A EDK2 Package that supplies a UEFI driver that will bind on top of Graphics Output Devices and rotate any Blt operations by 0, 90, 180 or 270 degrees. The rotation can be set via PCD value, or it can be changed dynamically via a per Graphics Output device protocol.  
+
 
 # Adding the GopRotate Dxe driver
 Add the package to your EDK2 tree (to the GopRotate directory).  In your project's DSC, add the line
@@ -24,4 +25,7 @@ In the project's DSC file, find the reference to the Shell.inf, and add to the &
   ```
   
   # Notes
-  This was developed using EDK2 tree svn revision 18624, 10-16-2015 through the NT32 project. 
+  * This was developed using EDK2 tree svn revision 18624, 10-16-2015 through the NT32 project, and using the Ovmf (Ia32, X64 and Ia32X64) projects.
+  * When rotating the screen, rotations that fall outside of the displayable region will be clipped.
+  * Rotation is done in software.
+  * Rotation on multiple GOP devices was tested using the NT32 project.
