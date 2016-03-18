@@ -122,13 +122,30 @@ EFI_STATUS EFIAPI GopRotateGetRotation(GRAPHICS_OUTPUT_PROTOCOL_ROTATE_PROTOCOL 
  **/
 EFI_STATUS EFIAPI GopRotateSetRotation(GRAPHICS_OUTPUT_PROTOCOL_ROTATE_PROTOCOL *This, ROTATE_SCREEN Rotation)
 {
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Blt = {0,0,0,0};
+    EFI_STATUS Status;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Blt = NULL;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL BlackPixel = {0, 0, 0, 0};
+    UINTN Size = 0;
+
     GRAPHICS_OUTPUT_ROTATE_PRIVATE *Private = GetPrivateFromGopRotate(This);
     if(Private != NULL)
     {
+        Size = (UINT32)MultU64x32(MultU64x32(Private->Gop->Mode->Info->HorizontalResolution, Private->Gop->Mode->Info->VerticalResolution), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+        Status = gBS->AllocatePool(EfiBootServicesData, Size, &Blt);
+        if(!EFI_ERROR(Status))
+        {
+            gBS->SetMem(Blt, Size, 0);
+            Status = Private->Gop->Blt(Private->Gop, Blt, EfiBltVideoToBltBuffer, 0, 0, 0, 0, Private->Gop->Mode->Info->HorizontalResolution, Private->Gop->Mode->Info->VerticalResolution, 0);
+        }
         Private->Rotation = Rotation;
 
-        Private->Blt(Private->Gop, &Blt, EfiBltVideoFill, 0, 0, 0, 0, Private->Gop->Mode->Info->HorizontalResolution, Private->Gop->Mode->Info->VerticalResolution, 0);
+        // Call the original Blt Function to fill the entire buffer
+        Private->Blt(Private->Gop, &BlackPixel, EfiBltVideoFill, 0, 0, 0, 0, Private->Gop->Mode->Info->HorizontalResolution, Private->Gop->Mode->Info->VerticalResolution, 0);
+        DEBUG((EFI_D_ERROR, "Continue\n"));
+        if(!EFI_ERROR(Status))
+        {
+            Status = Private->Gop->Blt(Private->Gop, Blt, EfiBltBufferToVideo, 0, 0, 0, 0, Private->Gop->Mode->Info->HorizontalResolution, Private->Gop->Mode->Info->VerticalResolution, 0);
+        }
     }
     return EFI_SUCCESS;
 }
