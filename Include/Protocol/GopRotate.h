@@ -1,5 +1,5 @@
 /* GopRotate.h
-Copyright (c) 2015, Aaron Pop
+Copyright (c) 2016, Aaron Pop
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -35,7 +35,8 @@ typedef enum
     Rotate0 = 0,
     Rotate90 = 1,
     Rotate180 = 2,
-    Rotate270 = 3
+    Rotate270 = 3,
+    RotateMax = 4
 } ROTATE_SCREEN;
 
 typedef struct _GRAPHICS_OUTPUT_PROTOCOL_ROTATE_PROTOCOL GRAPHICS_OUTPUT_PROTOCOL_ROTATE_PROTOCOL;

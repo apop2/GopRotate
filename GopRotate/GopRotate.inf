@@ -57,7 +57,7 @@
 [Guids]
 
 [Pcd]
-    gGopRotatePkgGuid.DefaultGopRotation
+  gGopRotatePkgGuid.DefaultGopRotation
 
 [Protocols]
   gEfiGraphicsOutputProtocolGuid                ## CONSUMES

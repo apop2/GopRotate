@@ -1,5 +1,5 @@
 /* GopRotateBlt.c
-Copyright (c) 2015, Aaron Pop
+Copyright (c) 2016, Aaron Pop
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -141,7 +141,6 @@ EFI_STATUS EFIAPI GopRotateSetRotation(GRAPHICS_OUTPUT_PROTOCOL_ROTATE_PROTOCOL 
 
         // Call the original Blt Function to fill the entire buffer
         Private->Blt(Private->Gop, &BlackPixel, EfiBltVideoFill, 0, 0, 0, 0, Private->Gop->Mode->Info->HorizontalResolution, Private->Gop->Mode->Info->VerticalResolution, 0);
-        DEBUG((EFI_D_ERROR, "Continue\n"));
         if(!EFI_ERROR(Status))
         {
             Status = Private->Gop->Blt(Private->Gop, Blt, EfiBltBufferToVideo, 0, 0, 0, 0, Private->Gop->Mode->Info->HorizontalResolution, Private->Gop->Mode->Info->VerticalResolution, 0);
@@ -258,7 +257,7 @@ EFI_STATUS PerformTranslations
 
                                 TranslatedIndex = MultU64x32( DivU64x32(OriginalDelta, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL)), OriginalSourceY+j) + (OriginalSourceX + OriginalWidth - i - 1);
 
-                                gBS->CopyMem(&(MyBuffer[Index]), &((*BltBuffer)[TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+                                gBS->CopyMem(&(MyBuffer[(UINTN)Index]), &((*BltBuffer)[(UINTN)TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
                             }
                         }
                     }
@@ -345,7 +344,7 @@ EFI_STATUS PerformTranslations
                             {
                                 Index = MultU64x32(DivU64x32(OriginalDelta, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL)), (OriginalDestinationY + j)) + OriginalDestinationX + i;
                                 TranslatedIndex = MultU64x32(*Width, (*Height - i - 1)) + j;
-                                gBS->CopyMem(&((*BltBuffer)[Index]), &(MyBuffer[TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+                                gBS->CopyMem(&((*BltBuffer)[(UINTN)Index]), &(MyBuffer[(UINTN)TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
                             }
                         }
                     }
@@ -356,6 +355,7 @@ EFI_STATUS PerformTranslations
             }
             break;
         }
+        
         case Rotate180:
         {
             if(*Delta == 0)
@@ -382,7 +382,7 @@ EFI_STATUS PerformTranslations
                             {
                                 Index = MultU64x32(*Width, (*Height - j - 1)) + (*Width - i - 1);
                                 TranslatedIndex = (UINTN)MultU64x32( DivU64x32(*Delta, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL)), j) + i;
-                                gBS->CopyMem( &(MyBuffer[Index]), &((*BltBuffer)[TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+                                gBS->CopyMem( &(MyBuffer[(UINTN)Index]), &((*BltBuffer)[(UINTN)TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
                             }
                         }
                         *BltBuffer = MyBuffer;
@@ -428,7 +428,7 @@ EFI_STATUS PerformTranslations
                         *SourceX = This->Mode->Info->HorizontalResolution - *Width - *SourceX;
                         *SourceY = This->Mode->Info->VerticalResolution - *Height - *SourceY;
 
-                        Status = Private->Blt(This, MyBuffer, BltOperation, *SourceX, *SourceY, 0, 0, *Width, *Height, *Width*sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+                        Status = Private->Blt(This, MyBuffer, BltOperation, *SourceX, *SourceY, 0, 0, *Width, *Height, (UINTN)MultU64x32(*Width, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL)));
                         *SourceX = This->Mode->Info->HorizontalResolution - *Width - *SourceX;
                         *SourceY = This->Mode->Info->VerticalResolution - *Height - *SourceY;
 
@@ -438,7 +438,7 @@ EFI_STATUS PerformTranslations
                             {
                                 Index = (UINTN)MultU64x32(DivU64x32(*Delta, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL)), (*DestinationY + j)) + *DestinationX + i;
                                 TranslatedIndex = MultU64x32(*Width, (*Height - j - 1)) + *Width - i - 1;
-                                gBS->CopyMem( &((*BltBuffer)[Index]), &(MyBuffer[TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+                                gBS->CopyMem( &((*BltBuffer)[(UINTN)Index]), &(MyBuffer[(UINTN)TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
                             }
                         }
 
@@ -466,7 +466,7 @@ EFI_STATUS PerformTranslations
             UINTN OriginalDelta = *Delta;
             if(*Delta == 0)
             {
-                *Delta = sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL) * *Width;
+                *Delta = (UINTN)MultU64x32(*Width, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
                 OriginalDelta = *Delta;
             }
             if(This->Mode->Info->VerticalResolution < (*DestinationX + *Width))
@@ -497,7 +497,7 @@ EFI_STATUS PerformTranslations
                             {
                                 TranslatedIndex = (UINTN)MultU64x32( DivU64x32(OriginalDelta, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL)), (OriginalSourceY + OriginalHeight - j - 1)) + OriginalSourceX + i;
                                 Index = (UINTN)MultU64x32(*Height, i) + j;
-                                gBS->CopyMem( &(MyBuffer[Index]), &((*BltBuffer)[TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+                                gBS->CopyMem( &(MyBuffer[(UINTN)Index]), &((*BltBuffer)[(UINTN)TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
                             }
                         }
                     }
@@ -583,7 +583,7 @@ EFI_STATUS PerformTranslations
                         *Width = OriginalHeight - ClippedX;
                         *Height = OriginalWidth;
 
-                        *Delta = OriginalHeight * sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
+                        *Delta = (UINTN)MultU64x32(OriginalHeight, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
 
                         Status = Private->Blt(This, MyBuffer, BltOperation, *SourceX, *SourceY, 0, 0, *Width, *Height, *Delta);
 
@@ -595,7 +595,7 @@ EFI_STATUS PerformTranslations
 
                                 Index = (UINTN)MultU64x32( DivU64x32(OriginalDelta, sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL)), (OriginalDestinationY + j)) + i + OriginalDestinationX;
 
-                                gBS->CopyMem( &((*BltBuffer)[Index]), &( MyBuffer[TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+                                gBS->CopyMem( &((*BltBuffer)[(UINTN)Index]), &( MyBuffer[(UINTN)TranslatedIndex]), sizeof(EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
                             }
                         }
                     }
