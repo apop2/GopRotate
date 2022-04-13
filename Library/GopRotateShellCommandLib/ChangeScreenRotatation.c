@@ -24,7 +24,6 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-#include <ShellBase.h>
 #include <Library/ShellLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -96,7 +95,7 @@ SHELL_STATUS EFIAPI ShellCommandRotate(IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_
     Status = gBS->HandleProtocol(Handle, &gGraphicsOutputProtocolRotateProtocolGuid, (VOID**)&GopRotate);
     if(EFI_ERROR(Status))
     {
-        Print(L"No Gop Rotate Protocol found on device\n");
+        Print(L"No Gop Rotate Protocol found on device handle %x\n", (UINTN)HandleNumber);
     }
     else
     {
